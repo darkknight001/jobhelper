@@ -21,8 +21,8 @@ You also need `git` and `python3` on that machine (the setup script uses python3
 ## 1. Get the code and run the setup script
 
 ```bash
-git clone https://github.com/<owner>/JobHelper.git
-cd JobHelper
+git clone https://github.com/darkknight001/jobhelper.git
+cd jobhelper
 scripts/setup.sh
 ```
 
@@ -204,7 +204,7 @@ Use `https` for any address other than localhost: login cookies are marked secur
 ## Updating
 
 ```bash
-cd JobHelper
+cd jobhelper
 git pull
 docker compose up -d --build
 ```

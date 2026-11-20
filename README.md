@@ -11,7 +11,7 @@ A self-hosted job-search assistant for job seekers in India. You run your own co
 ## Quick start
 
 ```bash
-git clone https://github.com/<owner>/JobHelper.git && cd JobHelper
+git clone https://github.com/darkknight001/jobhelper.git && cd jobhelper
 scripts/setup.sh                  # creates deploy/.env, config/settings.yaml, data/
 # edit deploy/.env: Claude token, Gmail app password, Telegram bot token, dashboard password
 docker compose up -d --build      # then open http://localhost:8095
