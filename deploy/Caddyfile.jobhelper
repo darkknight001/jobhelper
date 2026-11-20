@@ -1,0 +1,17 @@
+# Standalone example. Replace jobs.example.com with your own name.
+# TLS: for a public DNS name Caddy gets a certificate automatically. On a tailnet or LAN with no
+# public name, add `tls internal` inside the site block.
+# Keep it off the open internet: JobHelper is a single-user tool (see SECURITY.md).
+https://jobs.example.com {
+	# tls internal
+	# Remote browser (noVNC), only for a logged-in dashboard session.
+	handle_path /vnc/* {
+		forward_auth 127.0.0.1:8095 {
+			uri /auth/check
+		}
+		reverse_proxy 127.0.0.1:6080
+	}
+	handle {
+		reverse_proxy 127.0.0.1:8095
+	}
+}

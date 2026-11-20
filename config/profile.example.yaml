@@ -1,0 +1,84 @@
+# Structured facts the apply agent uses to fill forms. Copied to data/profile.yaml
+# on first run. EVERY null (or empty value) is a deliberate "do not answer": on any required
+# question whose answer is null, the apply agent stops and asks you instead of guessing.
+# Fill in only what you are happy for it to submit on your behalf.
+
+name:
+  first: ""
+  last: ""
+  full: ""
+email: ""
+phone: ""               # with country code, e.g. +91 70000 00000
+location:
+  city: ""
+  state: ""
+  country: India
+  pincode: ""
+links:
+  linkedin: null
+  github: null
+  portfolio: null
+
+current:
+  company: ""
+  title: ""
+  since: ""             # YYYY-MM
+total_experience_years: null
+relevant_experience_years: null
+# Years per skill, for "years of experience with X" questions. Use these numbers as they are.
+# e.g. { Python: 5, SQL: 4 }. Leave empty and it will ask rather than invent a number.
+skill_years: {}
+
+compensation:
+  currency: INR
+  current_ctc_lpa: null       # e.g. 32.5
+  current_fixed_lpa: null
+  expected_ctc_lpa: null
+  negotiable: true
+
+availability:
+  notice_period_days: null    # e.g. 60
+  serving_notice: null        # true/false
+  last_working_day: null      # YYYY-MM-DD if serving notice
+  can_join_early: null
+
+preferences:
+  work_mode: [hybrid, remote, onsite]
+  preferred_locations: [Delhi NCR, Bengaluru, Remote]
+  willing_to_relocate: null
+  relocate_to: []
+  # Cities where you accept a 5-days-a-week onsite role, e.g. [Pune, Gurugram]. Empty = ask me.
+  onsite_5_days_ok_in: []
+
+work_authorization:
+  country: India
+  authorized: true
+  needs_sponsorship: false
+
+education:
+  - degree: ""            # e.g. B.Tech
+    field: ""
+    institute: ""
+    year: null
+    score: null           # CGPA or percentage, exactly as on your marksheet
+  - degree: "Class 12"
+    field: null
+    institute: null
+    year: null
+    score: null
+  - degree: "Class 10"
+    field: null
+    institute: null
+    year: null
+    score: null
+
+personal:
+  date_of_birth: null         # only used if a form requires it
+  gender: null                # leave null to always skip optional demographic questions
+  languages: [English, Hindi]
+
+# Ready-made answers for common screening questions. The agent adapts them per job.
+answers:
+  why_change: null
+  about_me: null
+  biggest_achievement: null

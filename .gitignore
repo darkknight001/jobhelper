@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+deploy/.env
+# Personal data and runtime state: never commit.
+data/*
+!data/.gitkeep
+dist/
+# Your own settings: copy config/settings.example.yaml to config/settings.yaml.
+config/settings.yaml
+.claude/launch.json
+deploy/sed*
+*.tmp

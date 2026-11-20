@@ -1,0 +1,187 @@
+# JobHelper settings. Secrets do NOT go here; they live in .env.
+# Copy this file to config/settings.yaml (gitignored) and edit your copy; the app falls back
+# to this example when settings.yaml is missing. It is re-read at the start of every run.
+
+timezone: Asia/Kolkata
+
+candidate:
+  # Your total years of professional experience.
+  years_experience: 6
+  # A posting passes the experience prefilter when its minimum is at most
+  # years + stretch_years and its maximum is at least years - 1.
+  stretch_years: 3
+
+targets:
+  # Titles are matched case-insensitively as regular expressions.
+  roles:
+    - 'tech(nical)?\s*lead'
+    - 'lead\s+(software|backend|back-end|platform|python)?\s*(engineer|developer)'
+    - 'engineering\s+lead'
+    - 'senior\s+(software|backend|back-end|python|platform)\s*(engineer|developer)'
+    - 'sde\s*(-|\s)?(iii|3)'
+    - 'staff\s+(software\s+|backend\s+|platform\s+)?engineer'
+    - 'principal\s+(software\s+|backend\s+)?engineer'
+    - '(backend|software|platform|cloud)\s+architect'
+    - '(gen\s*ai|genai|llm|ai|ml)\s+(platform\s+)?(backend\s+)?engineer'
+    - 'ai\s+platform'
+    - 'forward[\s-]*deployed|\bfde\b'
+  # A title matching any of these is dropped even if it matched a role above.
+  exclude_titles:
+    - 'intern'
+    - '\bqa\b|quality\s+assurance|test(ing)?\s+engineer|sdet'
+    - 'front\s*-?end|react\s+(developer|engineer)|angular|ui\s+developer'
+    - '^(?!.*python).*\bjava\b(?!script)'
+    - '\.net|c#|dotnet'
+    - 'android|ios|mobile'
+    - 'sales|pre-?sales|business\s+development|account\s+manager'
+    - 'solutions?\s+(architect|engineer|consultant)|delivery'
+    - 'data\s+(entry|analyst)'
+    - 'support\s+engineer|helpdesk'
+    - 'trainee|fresher|junior|associate\s+software'
+  # Locations (case-insensitive substrings). Remote roles must be open to India.
+  locations:
+    - delhi
+    - new delhi
+    - ncr
+    - gurgaon
+    - gurugram
+    - noida
+    - bangalore
+    - bengaluru
+    - mumbai
+    - bombay
+    - chennai
+    - hyderabad
+    - pune
+    - remote
+    - work from home
+    - anywhere in india
+    - india
+
+search:
+  keywords:
+    - Senior Backend Engineer
+    - Tech Lead Backend
+    - Lead Software Engineer
+    - Staff Engineer Backend
+  locations:
+    naukri: [bengaluru, delhi-ncr, mumbai, remote]
+    linkedin: ["Bengaluru, Karnataka, India", "Delhi, India", "Mumbai, Maharashtra, India", "India"]
+    # Empty = no Indeed site search: Cloudflare usually blocks the automated browser there.
+    # Indeed jobs still arrive through Indeed alert emails. To try it anyway, e.g.:
+    # ["Bengaluru, Karnataka", "Gurgaon, Haryana", "Remote"]
+    indeed: []
+  # Only look at postings from the last N days.
+  max_age_days: 3
+  max_results_per_query: 40
+
+# Public ATS boards for companies worth watching. Use `jobhelper verify-boards`
+# to check that each token resolves before relying on it.
+# The token is the company slug in the board URL, e.g. boards.greenhouse.io/<token>,
+# jobs.lever.co/<token>, jobs.ashbyhq.com/<token>. A short illustrative list; edit to taste.
+ats_boards:
+  greenhouse: [stripe, databricks, gitlab]
+  lever: [cred, meesho]
+  ashby: [posthog, supabase]
+
+company_ratings:
+  # AmbitionBox employee reviews, rated 1/3/5 on culture, benefits, type of work and work-life.
+  # Jobs at companies rated 1 are filtered out before scoring. Average below bands[0] = 1,
+  # from bands[0] = 3, from bands[1] = 5. Companies with fewer reviews stay unrated (never filtered).
+  enabled: true
+  bands: [3.3, 4.0]
+  min_reviews: 20
+  # Jobs at companies rated 5 auto-apply from this score (others need scoring.auto_apply_min).
+  auto_apply_min_rated_5: 80
+
+scoring:
+  auto_apply_min: 85
+  review_min: 60
+  batch_size: 8
+
+apply:
+  # Max applications per portal per IST day (auto + approved combined).
+  daily_cap_per_portal: 10
+  # dry_run fills every form but never clicks the final submit. Safe default for new setups:
+  # turn it off once you've watched a few runs in noVNC and trust the answers.
+  dry_run: true
+  # Review-then-submit (with dry_run on): after filling a form, keep it open in the remote
+  # browser and hold the queue until you submit it yourself ("I submitted it") or skip it.
+  hold_for_review: true
+  # If you haven't decided within this many hours, the hold lapses and the queue moves on.
+  review_hold_hours: 12
+  # Seconds to wait between applications (random in this range).
+  pacing_seconds: [90, 240]
+  # Only apply in this IST window.
+  window_hours: [9, 22]
+  # Never apply to a posting older than this (posting date, or when JobHelper first saw it).
+  max_job_age_days: 7
+  # The resume uploaded to every application (a file name in data/resumes). Empty = let scoring
+  # pick among all PDFs there.
+  resume: ""
+  max_agent_turns: 50
+  # Stop an application that has produced no result after this long (you can Restart it).
+  run_timeout_minutes: 20
+
+llm:
+  # Per-task models. Opus is the most capable; move scoring to claude-haiku-5-5 or
+  # claude-sonnet-5-5 if you hit your subscription's usage limits.
+  scoring_model: claude-haiku-5-5
+  writing_model: claude-opus-5-5
+  apply_model: claude-sonnet-5-5
+  email_model: claude-opus-5-5
+  assistant_model: claude-sonnet-5-5   # the dashboard chat
+  # JobHelper shares your Claude subscription with your own use. It reads the live limit
+  # status from every call and pauses itself by priority so you keep headroom. Utilization is
+  # the fraction of a limit window used (5-hour, 7-day, ...).
+  governor:
+    background_max_utilization: 0.60   # scoring + prep briefs stop first
+    apply_max_utilization: 0.75        # then applying
+    email_max_utilization: 0.95        # recruiter-mail triage keeps going longest
+    max_apply_runs_per_day: 20         # hard ceiling on apply-agent runs per IST day
+
+schedule:
+  discover_cron: "0 8,12,16,20 * * *"     # IST
+  apply_cron: "*/20 9-21 * * *"
+  email_poll_minutes: 15
+  daily_summary: "21:00"
+  weekly_summary: "sun 19:00"            # weekly report; "" to disable
+  catchup: "02:00"                       # off-peak: score what the usage governor deferred
+
+email:
+  # Senders whose mails are job alerts (new postings), checked first.
+  alert_senders:
+    - jobalert@naukri.com
+    - naukri.com
+    - jobalerts-noreply@linkedin.com
+    - jobs-listings@linkedin.com
+    - alert@indeed.com
+    - indeed.com
+  # Domains that send recruiter replies / application status updates.
+  tracking_domains:
+    - naukri.com
+    - linkedin.com
+    - indeed.com
+    - greenhouse.io
+    - lever.co
+    - ashbyhq.com
+    - myworkday.com
+    - workday.com
+    - smartrecruiters.com
+    - icims.com
+    - darwinbox.in
+    - keka.com
+    - zohorecruit.com
+    - instahyre.com
+    - hirist.tech
+    - cutshort.io
+    # Mail-sending domains of ATS systems (differ from the domain you apply on)
+    - greenhouse-mail.io
+    - smartrecruitersmail.com
+    - successfactors.com
+    - successfactors.eu
+    - taleo.net
+    - workablemail.com
+    - jobvite.com
+    - recruitee.com
+    - freshteam.com

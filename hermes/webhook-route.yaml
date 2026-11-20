@@ -1,0 +1,18 @@
+# Appended to /home/hermes/.hermes/config.yaml (it has no top-level `platforms:` key today).
+# Pins the webhook listener to loopback (Hermes' default is all interfaces) and adds one
+# direct-delivery route: JobHelper's signed POST becomes a Telegram message verbatim,
+# without waking the agent (no LLM tokens).
+#
+# Plus in /home/hermes/.hermes/.env:
+#   WEBHOOK_ENABLED=true
+#   WEBHOOK_PORT=8644
+#   WEBHOOK_SECRET=<random; same value as HERMES_WEBHOOK_SECRET in JobHelper's deploy/.env>
+platforms:
+  webhook:
+    extra:
+      host: 127.0.0.1
+      routes:
+        jobhelper:
+          deliver: telegram
+          deliver_only: true
+          prompt: "{text}"

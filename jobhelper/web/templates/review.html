@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Review · JobHelper{% endblock %}
+{% block body %}
+<h1>Review queue</h1>
+<p class="muted small">Somewhat relevant jobs. Approve and the harness applies (within today's caps); skip and it won't ask again.</p>
+<form class="filters" method="get" action="/review" style="grid-template-columns:1fr;margin-top:12px">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search title or company" aria-label="Search the review queue">
+</form>
+<div class="stack">
+{% for j in jobs %}
+  {% set d = j.score_detail or {} %}
+  <div class="card">
+    <div class="row">
+      <div class="score {{ 'hi' if (j.score or 0) >= 80 else 'mid' }}">{{ (j.score or 0)|int }}</div>
+      {{ company_badge(j.company) }}
+      <div class="grow">
+        <h3><a href="/jobs/{{ j.id }}">{{ j.title }}</a></h3>
+        <div class="muted small">{{ j.company }} · {{ j.location or 'location?' }} · <span class="chip">{{ j.source }}</span>
+          {% if j.priority %}<span class="chip">priority alert</span>{% endif %} <span class="chip">#{{ j.id }}</span></div>
+      </div>
+    </div>
+    {% if d.summary %}<p style="margin-top:8px">{{ d.summary }}</p>{% endif %}
+    {% if j.review_note %}<p class="small" style="color:var(--warn)">{{ j.review_note }}</p>{% endif %}
+    <details><summary class="small">Why</summary>
+      {% if d.reasons %}<p class="small"><b>For</b></p><ul class="bul small">{% for r in d.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+      {% if d.gaps %}<p class="small"><b>Gaps</b></p><ul class="bul small">{% for r in d.gaps %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+      {% if d.red_flags %}<p class="small"><b>Red flags</b></p><ul class="bul small">{% for r in d.red_flags %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+    </details>
+    <div class="actions">
+      <form method="post" action="/jobs/{{ j.id }}/approve"><input type="hidden" name="back" value="{{ back }}"><button class="btn primary">Approve &amp; apply</button></form>
+      <form method="post" action="/jobs/{{ j.id }}/dismiss"><input type="hidden" name="back" value="{{ back }}"><button class="btn">Skip</button></form>
+      <a class="btn" href="{{ j.url|http_url }}" target="_blank" rel="noopener">Posting ↗</a>
+    </div>
+  </div>
+{% else %}
+  <div class="card muted">{{ 'No jobs match.' if q else 'Nothing waiting for review.' }}</div>
+{% endfor %}
+</div>
+{% from "_pager.html" import pager %}{{ pager(page, per, total, {"q": q}, "jobs to review") }}
+{% endblock %}

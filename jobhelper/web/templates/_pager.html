@@ -1,0 +1,9 @@
+{# Shared list pager: "51–100 of 7,846" plus Newer / Older, keeping the list's filters. #}
+{% macro pager(page, per, total, params, noun) %}
+{% set first = (page - 1) * per + 1 %}{% set last = [page * per, total]|min %}
+<nav class="pager" aria-label="Pages">
+  {% if page > 1 %}<a class="btn" href="?{{ dict(params, page=page - 1)|urlencode }}">← Newer</a>{% else %}<span></span>{% endif %}
+  <span class="muted small">{% if total %}{{ first }}–{{ last }} of {{ "{:,}".format(total) }} {{ noun }}{% else %}No {{ noun }}{% endif %}</span>
+  {% if page * per < total %}<a class="btn" href="?{{ dict(params, page=page + 1)|urlencode }}">Older →</a>{% else %}<span></span>{% endif %}
+</nav>
+{% endmacro %}

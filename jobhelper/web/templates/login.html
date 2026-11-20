@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · JobHelper</title><link rel="stylesheet" href="/static/app.css?v={{ v }}"></head>
+<body><main class="wrap"><div class="card login">
+  <h1>JobHelper</h1><p class="muted">Sign in to your dashboard.</p>
+  {% if error %}<div class="flash">{{ error }}</div>{% endif %}
+  <form method="post" action="/login">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label for="pw">Password</label>
+    <input id="pw" type="password" name="password" autocomplete="current-password" required autofocus>
+    <div class="actions"><button class="btn primary" type="submit" style="width:100%">Sign in</button></div>
+  </form>
+</div></main></body></html>

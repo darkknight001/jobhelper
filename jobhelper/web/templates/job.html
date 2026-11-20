@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} · JobHelper{% endblock %}
+{% block body %}
+{% set d = job.score_detail or {} %}
+<p class="small"><a href="javascript:history.back()">← Back</a></p>
+<div class="card">
+  <div class="row">
+    <div class="score {{ 'hi' if (job.score or 0) >= 80 else ('mid' if (job.score or 0) >= 60 else '') }}">{{ (job.score|int) if job.score is not none else '–' }}</div>
+    <div class="grow"><h1>{{ job.title }}</h1>
+      <div class="muted">{{ job.company }} · {{ job.location or 'location unknown' }}{% if job.remote %} · remote{% endif %}</div>
+      <div class="small muted">{{ job.experience or '' }} {{ ('· ' ~ job.salary) if job.salary else '' }} · <span class="chip">{{ job.source }}</span> <span class="st {{ job.status }}">{{ job.status|replace('_', ' ') }}</span></div>
+    </div>
+  </div>
+  {% if d.summary %}<p style="margin-top:10px">{{ d.summary }}</p>{% endif %}
+  <div class="grid2 small" style="margin-top:6px">
+    {% if d.reasons %}<div><b>For</b><ul class="bul">{% for r in d.reasons %}<li>{{ r }}</li>{% endfor %}</ul></div>{% endif %}
+    {% if d.gaps or d.red_flags %}<div><b>Gaps / flags</b><ul class="bul">{% for r in (d.gaps or []) + (d.red_flags or []) %}<li>{{ r }}</li>{% endfor %}</ul></div>{% endif %}
+  </div>
+  {% if job.filter_reason %}<p class="small muted">Filtered: {{ job.filter_reason }}</p>
+  {% elif company_rating(job.company) %}<p class="small muted">Company rating (AmbitionBox reviews): {{ company_rating(job.company) }}</p>{% endif %}
+  <div class="actions">
+    {% if job.status in ['review', 'skipped', 'scored'] %}
+    <form method="post" action="/jobs/{{ job.id }}/approve"><input type="hidden" name="back" value="/jobs/{{ job.id }}"><button class="btn primary">Approve &amp; apply</button></form>
+    <form method="post" action="/jobs/{{ job.id }}/dismiss"><input type="hidden" name="back" value="/jobs/{{ job.id }}"><button class="btn">Skip</button></form>
+    {% endif %}
+    <a class="btn" href="{{ job.url|http_url }}" target="_blank" rel="noopener">Posting ↗</a>
+    {% if job.apply_url and job.apply_url != job.url %}<a class="btn" href="{{ job.apply_url|http_url }}" target="_blank" rel="noopener">Company site ↗</a>{% endif %}
+  </div>
+</div>
+{% if apps %}
+<h2>Applications</h2>
+<div class="card"><ul class="list">{% for a in apps %}
+  <li><a href="/applications/{{ a.id }}">#{{ a.id }} · {{ a.mode }}</a> <span class="st {{ a.status }}">{{ a.status|replace('_', ' ') }}</span></li>{% endfor %}</ul></div>
+{% endif %}
+<h2>Description</h2>
+<pre class="desc">{{ job.description or 'No description captured.' }}</pre>
+{% endblock %}

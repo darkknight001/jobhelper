@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Settings · JobHelper{% endblock %}
+{% block body %}
+<h1>Settings</h1>
+{% if msg %}<div class="flash">{{ msg }}</div>{% endif %}
+<form class="card" method="post" action="/settings">
+  <label>
+    <input type="checkbox" name="dry_run" {{ 'checked' if s.apply.dry_run }}> Dry run (fill forms, never submit)</label>
+  <label>
+    <input type="checkbox" name="hold_for_review" {{ 'checked' if s.apply.get('hold_for_review', True) }}>
+    Review-then-submit (with dry run: keep each filled form open and wait for you)</label>
+  <div class="grid2">
+    <div><label for="a">Auto-apply when score ≥</label><input id="a" type="number" name="auto_apply_min" value="{{ s.scoring.auto_apply_min }}" min="0" max="100"></div>
+    <div><label for="r">Send to review when score ≥</label><input id="r" type="number" name="review_min" value="{{ s.scoring.review_min }}" min="0" max="100"></div>
+    <div><label for="c">Max applications per portal per day</label><input id="c" type="number" name="daily_cap" value="{{ s.apply.daily_cap_per_portal }}" min="0" max="50"></div>
+  </div>
+  <div class="actions"><button class="btn primary">Save</button></div>
+  <p class="small muted">Everything else (keywords, locations, boards, schedules, models) lives in <code>config/settings.yaml</code>.</p>
+</form>
+
+<h2>Pause</h2>
+<div class="card">
+  <p class="small">Stops job search, scoring and new applications for a while (an application already running
+    finishes first). Gmail is still checked, so interview and recruiter alerts keep coming. Same as
+    <code>/pause</code> in the Telegram bot.</p>
+  {% if paused %}
+    <form method="post" action="/resume" class="actions"><input type="hidden" name="back" value="/settings">
+      <button class="btn primary">Resume now ({{ paused.label }})</button></form>
+  {% else %}
+    <div class="actions">
+      {% for value, label in [("60", "1 hour"), ("180", "3 hours"), ("tomorrow", "Until 9 AM"), ("off", "Until I resume")] %}
+      <form method="post" action="/pause"><input type="hidden" name="duration" value="{{ value }}"><button class="btn">{{ label }}</button></form>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<h2>Run now</h2>
+<div class="card">
+  <div class="actions">
+    {% for what, label in [("discover", "Find jobs"), ("apply", "Apply queue"), ("email", "Check email"), ("summary", "Send summary")] %}
+    <form method="post" action="/run/{{ what }}"><button class="btn">{{ label }}</button></form>
+    {% endfor %}
+  </div>
+  {% for k, v in state.items() if k.startswith('last_') %}<p class="small muted">{{ k[5:] }}: {{ v.status }}{% if v.error %} · {{ v.error[:160] }}{% endif %}</p>{% endfor %}
+</div>
+
+<h2>Telegram bot</h2>
+<div class="card">
+  {% if tg.state == 'no_token' %}
+    <p class="small">Not set up. Alerts go through Hermes. To use JobHelper's own bot: create one with
+    @BotFather, put its token in <code>deploy/.env</code> as <code>TELEGRAM_BOT_TOKEN</code>, restart, then come back here.</p>
+  {% elif tg.state == 'waiting' %}
+    {% if tg.error %}<p class="muted">⚠ Telegram is not answering for this bot yet ({{ tg.error }}). It keeps retrying on its own; pairing works once it connects.</p>{% endif %}
+    <p>Send this to {% if tg.bot %}<b>@{{ tg.bot }}</b>{% else %}your bot{% endif %} in Telegram:</p>
+    <p style="font-size:1.4rem;font-weight:700;letter-spacing:.05em"><code>/start {{ tg.code }}</code></p>
+    <p class="small muted">Until it's paired, alerts keep going through Hermes. Reload this page after sending.</p>
+  {% else %}
+    <p>Paired{% if tg.name %} with <b>{{ tg.name }}</b>{% endif %}. All alerts come to this bot, with tap buttons;
+    Hermes is only the fallback.</p>
+    <div class="actions">
+      <form method="post" action="/telegram/test"><button class="btn">Send test message</button></form>
+      <form method="post" action="/telegram/unpair"><button class="btn danger">Unpair</button></form>
+    </div>
+  {% endif %}
+</div>
+
+<h2>Browser</h2>
+<div class="card">
+  <p class="small">Log in to Naukri, LinkedIn and Indeed once in the remote browser. Sessions persist. Use it also to clear CAPTCHAs the agent stops on.</p>
+  <div class="actions">
+    <form method="post" action="/run/browser"><button class="btn primary">1 · Open portal logins</button></form>
+    <a class="btn" href="{{ vnc_url }}" target="_blank">2 · Open remote browser</a>
+  </div>
+</div>
+
+<form method="post" action="/logout" style="margin-top:18px"><button class="btn danger">Sign out</button></form>
+{% endblock %}

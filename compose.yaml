@@ -1,0 +1,36 @@
+# Dockge-compatible stack: lives at /opt/stacks/jobhelper.
+services:
+  jobhelper:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile
+    image: jobhelper:latest
+    container_name: jobhelper
+    restart: unless-stopped
+    init: true
+    shm_size: "1gb"
+    env_file: deploy/.env
+    # Own network namespace (not host): Chromium's control port (9333) and raw VNC (5911)
+    # exist only inside the container, so nothing else on the server can drive the
+    # logged-in browser. Only the dashboard and noVNC are published, on loopback, for Caddy.
+    ports:
+      - "127.0.0.1:8095:8095"
+      - "127.0.0.1:6080:6080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      TZ: Asia/Kolkata
+      JOBHELPER_BIND: 0.0.0.0:8095          # inside the container; published on host loopback only
+      JOBHELPER_CDP_PORT: "9333"
+      JOBHELPER_CONTAINER: "1"
+      HERMES_WEBHOOK_URL: http://host.docker.internal:8644/webhooks/jobhelper
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+
+networks:
+  default:
+    # Fixed subnet so the one ufw rule (container -> Hermes webhook on 8644) can be this narrow.
+    ipam:
+      config:
+        - subnet: 172.30.95.0/24

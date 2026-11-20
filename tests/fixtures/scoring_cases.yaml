@@ -1,0 +1,79 @@
+# Labelled postings for the scoring eval (`jobhelper verify --llm`). Bands are for the
+# current candidate (6 yrs, Python backend / Tech Lead, Delhi NCR · Bengaluru · remote India).
+- id: strong-techlead-python
+  title: Tech Lead - Backend (Python)
+  company: A Series-C fintech
+  location: Bengaluru, India (hybrid)
+  experience: 6-10 Yrs
+  description: |
+    Lead a team of 6 engineers building our payments platform. Python, FastAPI, Kafka,
+    PostgreSQL on AWS (EKS). Own architecture, reliability and on-call. Mentor engineers.
+    Experience with high-throughput APIs and observability (Prometheus/Grafana) required.
+  expect: {min: 85, max: 100}
+
+- id: strong-genai-backend
+  title: Senior Backend Engineer - GenAI Platform
+  company: SaaS analytics company
+  location: Gurugram, Haryana
+  experience: 5-9 Yrs
+  description: |
+    Build the backend for our LLM features: RAG pipelines, embeddings, pgvector, streaming
+    chat APIs. Python (FastAPI), PostgreSQL, Redis, Kubernetes. ClickHouse a plus.
+  expect: {min: 82, max: 100}
+
+- id: java-only
+  title: Senior Software Engineer
+  company: Large bank
+  location: Bengaluru, India
+  experience: 6-9 Yrs
+  description: |
+    Java 17, Spring Boot, Hibernate, Oracle. Build microservices for core banking.
+    Must have 5+ years of Java and Spring. No other languages used on this team.
+  expect: {min: 0, max: 70}
+
+- id: presales
+  title: Senior Solutions Engineer
+  company: Observability vendor
+  location: Bengaluru, India
+  experience: 6-10 Yrs
+  description: |
+    Partner with account executives to run demos and proofs of concept for prospects.
+    Travel up to 40%. Quota-carrying role supporting enterprise sales in APAC.
+  expect: {min: 0, max: 45}
+
+- id: too-senior-go
+  title: Principal Engineer
+  company: Cloud infrastructure company
+  location: Remote (India)
+  experience: 14+ Yrs
+  description: |
+    14+ years building distributed storage systems in Go or C++. Set technical direction
+    across five teams. Deep expertise in consensus protocols and kernel-level performance.
+  expect: {min: 0, max: 62}
+
+- id: us-only-remote
+  title: Senior Python Engineer
+  company: US healthtech startup
+  location: Remote - United States
+  experience: 5+ Yrs
+  description: |
+    Python, Django, AWS. You must be authorized to work in the US and reside in a US time zone.
+  expect: {min: 0, max: 45, location_ok: false}
+
+- id: frontend
+  title: Lead Frontend Engineer
+  company: E-commerce company
+  location: Noida, India
+  experience: 6-10 Yrs
+  description: |
+    Lead our React/Next.js web team. TypeScript, design systems, web performance, accessibility.
+  expect: {min: 0, max: 40}
+
+- id: under-level
+  title: Backend Engineer (Python)
+  company: Seed-stage startup
+  location: Noida, India
+  experience: 2-4 Yrs
+  description: |
+    Python/Django engineer for our ops platform. REST APIs, PostgreSQL, Celery. Join a 4-person team.
+  expect: {min: 40, max: 78}

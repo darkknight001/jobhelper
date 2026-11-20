@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Knowledge · JobHelper{% endblock %}
+{% block body %}
+<h1>Knowledge base</h1>
+<p class="muted small">Everything the scorer and the apply agent know about you. Notes and imports are plain Markdown in <code>data/kb/</code>.</p>
+{% if msg %}<div class="flash">{{ msg }}</div>{% endif %}
+{% if missing %}<div class="banner">Profile fields still empty (the agent will stop and ask instead of guessing): {{ missing|join(', ') }}</div>{% endif %}
+
+<h2>Add a note</h2>
+<form class="card" method="post" action="/kb/note">
+  <label for="topic">Topic (optional)</label><input id="topic" type="text" name="topic" placeholder="e.g. Notice period">
+  <label for="text">Note</label><textarea id="text" name="text" required placeholder="e.g. Can join in 45 days; buyout possible."></textarea>
+  <div class="actions"><button class="btn primary">Save note</button></div>
+</form>
+
+<h2>Import from claude.ai</h2>
+<form class="card" method="post" action="/kb/import">
+  <p class="small muted">Paste the answer to the export prompt (docs/claude-kb-export-prompt.md). Re-importing replaces the previous export.</p>
+  <input type="hidden" name="name" value="claude-export">
+  <textarea name="content" required placeholder="# Identity & logistics ..." style="min-height:180px"></textarea>
+  <div class="actions"><button class="btn primary">Import</button></div>
+</form>
+
+<h2>Documents</h2>
+<div class="card"><ul class="list">
+  {% for d in docs %}<li><b>{{ d.title }}</b> <span class="chip">{{ d.file }}</span><div class="muted small">{{ d.chars }} chars · updated {{ d.modified.strftime('%d %b %H:%M') }}</div></li>{% endfor %}
+</ul></div>
+
+<h2>Resumes</h2>
+<div class="card">
+  <ul class="list">{% for r in resumes %}<li>{{ r }}</li>{% else %}<li class="muted">No resume uploaded.</li>{% endfor %}</ul>
+  <form method="post" action="/kb/resume" enctype="multipart/form-data">
+    <label for="f">Upload another variant (PDF). The scorer picks the best one per job.</label>
+    <input id="f" type="file" name="file" accept="application/pdf" required>
+    <div class="actions"><button class="btn">Upload</button></div>
+  </form>
+</div>
+
+<h2>Profile</h2>
+<form class="card" method="post" action="/kb/profile">
+  <p class="small muted">Structured facts for forms (YAML). Leave a value <code>null</code> to make the agent ask you.</p>
+  <input type="hidden" name="profile_version" value="{{ profile_version }}">
+  <textarea name="profile_text" style="min-height:360px" spellcheck="false">{{ profile_text }}</textarea>
+  <div class="actions"><button class="btn primary">Save profile</button></div>
+</form>
+
+{% if logins %}
+<h2>Career-site accounts created</h2>
+<div class="card"><ul class="list small">{% for l in logins %}<li><b>{{ l.domain }}</b> · {{ l.username }} <span class="muted">· {{ l.created_at[:10] }}</span></li>{% endfor %}</ul>
+<p class="small muted">Passwords are encrypted in the database; <code>jobhelper vault show &lt;domain&gt;</code> on the server prints one.</p></div>
+{% endif %}
+{% endblock %}

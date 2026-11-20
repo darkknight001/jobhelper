@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>{% block title %}JobHelper{% endblock %}</title>
+<link rel="stylesheet" href="/static/app.css?v={{ v }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230071e3'/><path d='M10 12h12v11H10z' fill='none' stroke='white' stroke-width='2'/><path d='M13 12V9h6v3' fill='none' stroke='white' stroke-width='2'/></svg>">
+</head>
+<body>
+{% set links = [("/", "Home"), ("/review", "Review"), ("/jobs", "Jobs"), ("/applications", "Applications"), ("/kb", "Knowledge"), ("/settings", "Settings")] %}
+<header class="top"><div class="inner">
+  <a class="brand" href="/">JobHelper</a>
+  <a class="top-icon {{ 'on' if nav.startswith('/settings') }}" href="/settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
+  <nav>{% for href, label in links %}<a href="{{ href }}" class="{{ 'on' if (nav == href or (href != '/' and nav.startswith(href))) }}">{{ label }}</a>{% endfor %}</nav>
+</div></header>
+<main class="wrap">
+  {% if dry_run %}<div class="banner"><b>Dry-run mode.</b> Applications are filled but not submitted. Switch it off in <a href="/settings">Settings</a> once you trust the answers.</div>{% endif %}
+  {% if paused %}<div class="banner"><b>Paused {{ paused.label }}.</b> No job search, scoring or new applications;
+    Gmail alerts and summaries keep coming.
+    <form method="post" action="/resume" style="display:inline"><input type="hidden" name="back" value="{{ nav }}">
+      <button class="btn primary" style="min-height:32px;margin-left:6px">Resume now</button></form></div>{% endif %}
+  {% block body %}{% endblock %}
+</main>
+<nav class="bottom" aria-label="Main">
+  <a href="/" class="{{ 'on' if nav == '/' }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+  <a href="/review" class="{{ 'on' if nav.startswith('/review') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>Review</a>
+  <a href="/jobs" class="{{ 'on' if nav.startswith('/jobs') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Jobs</a>
+  <a href="/applications" class="{{ 'on' if nav.startswith('/applications') or nav.startswith('/prep') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Applied</a>
+  <a href="/kb" class="{{ 'on' if nav.startswith('/kb') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>Knowledge</a>
+</nav>
+{% if chat %}<script src="/static/chat.js?v={{ v }}" defer></script>{% endif %}</body>
+</html>

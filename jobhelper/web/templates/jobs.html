@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Jobs · JobHelper{% endblock %}
+{% block body %}
+<h1>Jobs</h1>
+<div class="tabs">
+  <a href="/jobs" class="{{ 'on' if not status }}">All</a>
+  {% for t in tabs %}{% if counts.get(t) %}<a href="/jobs?status={{ t }}" class="{{ 'on' if status == t }}">{{ t|replace('_', ' ') }} · {{ counts[t] }}</a>{% endif %}{% endfor %}
+</div>
+<form class="filters" method="get" action="/jobs">
+  <input type="hidden" name="status" value="{{ status }}">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search title or company">
+  <select name="source" onchange="this.form.submit()">
+    <option value="">All sources</option>
+    {% for s_ in ["naukri", "linkedin", "indeed", "greenhouse", "lever", "ashby"] %}<option value="{{ s_ }}" {{ 'selected' if source == s_ }}>{{ s_ }}</option>{% endfor %}
+  </select>
+</form>
+<div class="card"><ul class="list">
+  {% for j in jobs %}
+  <li class="row">
+    <div class="score {{ 'hi' if (j.score or 0) >= 80 else ('mid' if (j.score or 0) >= 60 else '') }}">{{ (j.score|int) if j.score is not none else '–' }}</div>
+    {{ company_badge(j.company) }}
+    <div class="grow">
+      <a href="/jobs/{{ j.id }}" class="ellipsis" style="display:block">{{ j.title }}</a>
+      <div class="muted small ellipsis">{{ j.company }} · {{ j.location or '' }} · {{ j.source }}</div>
+      {% if j.filter_reason %}<div class="muted small">{{ j.filter_reason }}</div>{% endif %}
+    </div>
+    <span class="st {{ j.status }}">{{ j.status|replace('_', ' ') }}</span>
+  </li>
+  {% else %}<li class="muted">No jobs match.</li>{% endfor %}
+</ul></div>
+{% from "_pager.html" import pager %}{{ pager(page, per, total, {"status": status, "source": source, "q": q}, "jobs") }}
+{% endblock %}

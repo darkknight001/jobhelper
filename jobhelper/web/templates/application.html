@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Application #{{ a.id }} · JobHelper{% endblock %}
+{% block body %}
+<p class="small"><a href="/applications">← Applications</a></p>
+<div class="card">
+  <h1>{{ job.title }}</h1>
+  <div class="muted">{{ job.company }} · {{ a.portal }} · {{ a.mode }} <span class="st {{ a.status }}">{{ a.status|replace('_', ' ') }}</span></div>
+  {% set cr = company_rating(job.company) %}{% if cr %}<p class="small muted">Company rating (AmbitionBox reviews): {{ cr }}</p>{% endif %}
+  {% if a.applied_at %}<p class="small muted">Applied {{ a.applied_at|ist('%d %b %Y %H:%M') }} IST</p>{% endif %}
+  {% if msg %}<div class="banner" style="margin-top:10px">{{ msg }}</div>{% endif %}
+  {% if a.status == 'needs_user' and block.question %}
+    <div class="banner" style="margin-top:10px"><b>It asks:</b> {{ block.question }}
+      <form method="post" action="/applications/{{ a.id }}/answer" style="margin-top:8px">
+        {% if block.options %}<div class="actions" style="margin-top:0">{% for o in block.options %}
+          <button class="btn" name="choice" value="{{ o }}">{{ o }}</button>{% endfor %}</div>{% endif %}
+        <div class="actions"><input type="text" name="answer" aria-label="Your answer" placeholder="{{ 'Or type' if block.options else 'Type' }} your answer" style="flex:1;min-width:180px">
+          <button class="btn primary">Send answer</button></div>
+      </form>
+      <p class="small muted">Saved to your knowledge base, then the application continues in the tab it left open.
+        Or finish it yourself in the <a href="{{ vnc_url }}" target="_blank">remote browser</a> and tap Resume.</p>
+    </div>
+  {% elif a.blocker %}
+    <div class="banner" style="margin-top:10px"><b>Needs you:</b> {{ a.blocker }}<br>
+      Its tab stays open in the <a href="{{ vnc_url }}" target="_blank">remote browser</a>. Finish the step there, then tap Resume.</div>
+  {% endif %}
+  {% if a.status == 'apply_yourself' %}
+    <div class="banner" style="margin-top:10px">
+      <b>Apply in your own browser.</b> This site blocks automated browsers (a "verify you are human"
+      check), so JobHelper can't do it. Open the link on your phone or laptop, apply there, then tap
+      <b>I submitted it</b>.
+    </div>
+    <div class="actions">
+      <a class="btn" href="{{ (a.final_url or job.apply_url or job.url)|http_url }}" target="_blank" rel="noopener">Open application ↗</a>
+      <form method="post" action="/applications/{{ a.id }}/submitted"><button class="btn primary">I submitted it</button></form>
+    </div>
+  {% endif %}
+  {% if a.status in ['awaiting_review', 'dry_run_ok', 'review_expired'] %}
+    <div class="banner" style="margin-top:10px">
+      <b>{{ 'Ready for your review' if a.status != 'review_expired' else 'Review window passed' }}.</b>
+      The form is filled{{ ' and still open' if a.status == 'awaiting_review' else '' }} in the
+      <a href="{{ vnc_url }}" target="_blank">remote browser</a>; nothing was submitted.
+      Check the answers below, submit it there yourself if you're happy, then tap <b>I submitted it</b>.
+      {% if a.status == 'awaiting_review' %}The queue waits for you (up to {{ hold_hours }}h).{% endif %}
+    </div>
+    <div class="actions">
+      <a class="btn" href="{{ vnc_url }}" target="_blank">Open remote browser</a>
+      <form method="post" action="/applications/{{ a.id }}/submitted"><button class="btn primary">I submitted it</button></form>
+    </div>
+  {% endif %}
+  {% if a.notes %}<p class="small">{{ a.notes }}</p>{% endif %}
+  <div class="actions">
+    {% if a.status == 'needs_user' %}<form method="post" action="/applications/{{ a.id }}/resume"><button class="btn primary">Resume</button></form>
+    <form method="post" action="/applications/{{ a.id }}/apply-yourself"><button class="btn">Apply myself</button></form>{% endif %}
+    {% if restartable %}<form method="post" action="/applications/{{ a.id }}/restart"
+      onsubmit="return confirm('Start this application again from scratch? Anything filled so far is discarded.')">
+      <button class="btn">↻ Restart application</button></form>{% endif %}
+    {% if has_prep %}<a class="btn primary" href="/prep/{{ a.id }}">Prep brief</a>{% endif %}
+    {% if a.status in ['shortlisted', 'assessment', 'interview', 'viewed', 'applied'] %}
+    <form method="post" action="/applications/{{ a.id }}/prep"><button class="btn">{{ 'Regenerate' if has_prep else 'Write' }} prep brief</button></form>{% endif %}
+    <a class="btn" href="/jobs/{{ job.id }}">Job</a>
+    {% if a.final_url %}<a class="btn" href="{{ a.final_url|http_url }}" target="_blank" rel="noopener">Final page ↗</a>{% endif %}
+  </div>
+  {% if removable %}
+  <form method="post" action="/applications/{{ a.id }}/skip" class="skipbox">
+    <label for="reason">Skip this job (it won't be tried again)</label>
+    <div class="actions" style="margin-top:4px">
+      <select id="reason" name="reason" onchange="this.form.other.style.display = this.value === 'Other' ? 'block' : 'none'">
+        {% for r in skip_reasons %}<option>{{ r }}</option>{% endfor %}
+      </select>
+      <button class="btn danger" type="submit">Skip this job</button>
+    </div>
+    <input type="text" name="other" placeholder="Reason (optional)" style="display:none;margin-top:8px">
+  </form>
+  {% endif %}
+</div>
+
+<h2>Timeline</h2>
+<div class="card"><div class="timeline">
+  {% for e in events %}
+  <div class="ev"><div class="small muted">{{ e.at|ist }} · {{ e.kind|replace('_', ' ') }}</div>
+    <div>{{ e.summary }}</div>
+    {% set ev = (e.detail or {}).get('event') or {} %}
+    {% if ev %}<div class="small">{% for k, v in ev.items() if v %}<div><b>{{ k|capitalize }}:</b> {{ v }}</div>{% endfor %}</div>{% endif %}
+    {% if (e.detail or {}).get('questions') %}<ul class="bul small">{% for q in e.detail.questions %}<li>{{ q }}</li>{% endfor %}</ul>{% endif %}
+    {% if (e.detail or {}).get('suggested_reply') %}<details class="small"><summary>Suggested reply (draft for you to send, never sent automatically)</summary><pre class="desc">{{ e.detail.suggested_reply }}</pre></details>{% endif %}
+  </div>
+  {% else %}<p class="muted">No events yet.</p>{% endfor %}
+</div></div>
+
+{% if a.answers %}
+<h2>Answers given</h2>
+<div class="card"><ul class="list small">
+  {% for q in a.answers %}<li><b>{{ q.question }}</b><br>{{ q.answer }} <span class="chip">{{ q.source }}</span></li>{% endfor %}
+</ul></div>
+{% endif %}
+{% if submitted_shot %}<h2>When you submitted</h2><img class="shot" src="/artifacts/{{ a.id }}/submitted.png" alt="Browser screen when you marked it submitted">{% endif %}
+{% if shot %}<h2>Last screen the agent saw</h2><img class="shot" src="/artifacts/{{ a.id }}/final.png" alt="Final page of the application">{% endif %}
+{% endblock %}

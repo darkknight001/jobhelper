@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Prep{% if job %} · {{ job.company }}{% endif %}{% endblock %}
+{% block body %}
+<p class="small"><a href="/applications/{{ app_id }}">← Application</a></p>
+<article class="card prose">{{ html|safe }}</article>
+{% endblock %}

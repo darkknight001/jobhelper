@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Applications · JobHelper{% endblock %}
+{% block body %}
+<h1>Applications</h1>
+<div class="tabs">
+  <a href="/applications" class="{{ 'on' if not status }}">All</a>
+  {% for k, v in counts.items() %}<a href="/applications?status={{ k }}" class="{{ 'on' if status == k }}">{{ k|replace('_', ' ') }} · {{ v }}</a>{% endfor %}
+</div>
+<form class="filters" method="get" action="/applications" style="grid-template-columns:1fr">
+  <input type="hidden" name="status" value="{{ status }}">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search title or company" aria-label="Search applications">
+</form>
+<div class="card"><ul class="list">
+  {% for a, j in rows %}
+  <li class="row">
+    <div class="score {{ 'hi' if (j.score or 0) >= 80 else ('mid' if (j.score or 0) >= 60 else '') }}">{{ (j.score|int) if j.score is not none else '–' }}</div>
+    {{ company_badge(j.company) }}
+    <div class="grow">
+      <a href="/applications/{{ a.id }}" class="ellipsis" style="display:block">{{ j.title }}</a>
+      <div class="muted small ellipsis">{{ j.company }} · {{ a.portal }} · {{ a.mode }} · {{ (a.applied_at or a.created_at)|ist('%d %b') }}</div>
+      {% if a.blocker %}<div class="small" style="color:var(--warn)">{{ a.blocker[:140] }}</div>{% endif %}
+    </div><span class="st {{ a.status }}">{{ a.status|replace('_', ' ') }}</span></li>
+  {% else %}<li class="muted">No applications yet.</li>{% endfor %}
+</ul></div>
+{% from "_pager.html" import pager %}{{ pager(page, per, total, {"status": status, "q": q}, "applications") }}
+{% endblock %}
