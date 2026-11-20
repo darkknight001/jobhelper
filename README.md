@@ -132,3 +132,7 @@ Naukri, LinkedIn and Indeed prohibit automated applying in their terms, and auto
 an account restricted. Applications are sent on your behalf and answers can be wrong. Keep dry
 run on until you trust it, review what it submits, and use JobHelper at your own risk. It is
 provided as is, with no warranty.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
